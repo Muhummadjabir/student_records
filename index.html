@@ -23,51 +23,98 @@
 
 <h2>Student Records</h2>
 
+<?php
+// Database connection variables
+$servername = "localhost";
+$username = "root";
+$password = ""; // Use your actual database password
+$dbname = "student_records";
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Insert new record if form is submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $first_name = $_POST['first_name'];
+    $last_name = $_POST['last_name'];
+    $gender = $_POST['gender'];
+    $grade_level = $_POST['grade_level'];
+    $gpa = $_POST['gpa'];
+    $phone_number = $_POST['phone_number'];
+
+    $sql = "INSERT INTO students (first_name, last_name, gender, grade_level, gpa, phone_number)
+            VALUES ('$first_name', '$last_name', '$gender', $grade_level, $gpa, '$phone_number')";
+
+    if ($conn->query($sql) === TRUE) {
+        // Redirect to the same page to prevent resubmission
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    } else {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
+}
+?>
+
+<form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
+    <label for="first_name">First Name:</label>
+    <input type="text" id="first_name" name="first_name" required><br><br>
+    <label for="last_name">Last Name:</label>
+    <input type="text" id="last_name" name="last_name" required><br><br>
+    <label for="gender">Gender:</label>
+    <select id="gender" name="gender" required>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+    </select><br><br>
+    <label for="grade_level">Grade Level:</label>
+    <input type="number" id="grade_level" name="grade_level" required><br><br>
+    <label for="gpa">Current GPA:</label>
+    <input type="number" step="0.1" id="gpa" name="gpa" required><br><br>
+    <label for="phone_number">Phone Number:</label>
+    <input type="text" id="phone_number" name="phone_number" required><br><br>
+    <input type="submit" value="Add Student">
+</form>
+
 <table>
     <thead>
-        <tr>
-            <th>Student ID</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Date of Birth</th>
-            <th>Gender</th>
-            <th>Grade Level</th>
-            <th>Current GPA</th>
-            <th>Phone Number</th>
-        </tr>
+    <tr>
+        <th>Student ID</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Gender</th>
+        <th>Grade Level</th>
+        <th>Current GPA</th>
+        <th>Phone Number</th>
+    </tr>
     </thead>
     <tbody>
-        <tr>
-            <td>1</td>
-            <td>Adam</td>
-            <td>Suleiman</td>
-            <td>2005-06-15</td>
-            <td>Male</td>
-            <td>10</td>
-            <td>3.5</td>
-            <td>08108193055</td>
-        </tr>
-        <tr>
-            <td>2</td>
-            <td>Khadijat</td>
-            <td>Hassan</td>
-            <td>2004-09-23</td>
-            <td>Female</td>
-            <td>11</td>
-            <td>3.8</td>
-            <td>08107759796</td>
-        </tr>
-        <tr>
-            <td>3</td>
-            <td>Ahmad</td>
-            <td>Hassan</td>
-            <td>2003-12-13</td>
-            <td>Male</td>
-            <td>12</td>
-            <td>3.2</td>
-            <td>07034567704</td>
-        </tr>
-        <!-- Add more rows as needed -->
+    <?php
+    // Fetch existing records from the database and display them
+    $sql = "SELECT id, first_name, last_name, gender, grade_level, gpa, phone_number FROM students";
+    $result = $conn->query($sql);
+
+    if ($result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+            echo "<tr>
+                    <td>{$row['id']}</td>
+                    <td>{$row['first_name']}</td>
+                    <td>{$row['last_name']}</td>
+                    <td>{$row['gender']}</td>
+                    <td>{$row['grade_level']}</td>
+                    <td>{$row['gpa']}</td>
+                    <td>{$row['phone_number']}</td>
+                  </tr>";
+        }
+    } else {
+        echo "<tr><td colspan='7'>No records found</td></tr>";
+    }
+
+    $conn->close();
+    ?>
     </tbody>
 </table>
 
